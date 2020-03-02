@@ -64,7 +64,7 @@ func _physics_process(delta):
       var m : float = max(abs(dist.x), abs(dist.z))
       #if max(abs(dist.x), abs(dist.z)) > radius:
       if m > radius:
-         if m > length:
+         if m > g_length:
             old_p_loc = p_t.origin
             _generate_grid()
             return
