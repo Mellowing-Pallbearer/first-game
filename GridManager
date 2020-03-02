@@ -1,0 +1,85 @@
+#using GDScript for Godot
+"""
+- Convert a list into a grid -
+
+list = [0,1,2,3,4,5,6,7,8]
+row_length = 3 #how many items are in a row
+column = int(i ÷ row_length) #get the column of the desired number
+spacing = 1 #space between origin points of grid pieces
+
+  EXAMPLE GRID
+
+Columns| Grid Rows
+_______|___________
+0      |  0 - 1 - 2
+1      |  3 - 4 - 5
+2      |  6 - 7 - 8
+
+"""
+
+const pre_gp = preload("res://GridPiece.tscn") #don't know the type for a preloaded scene
+const p_t : Transform = get_node("/root/Player").transform #Transform of the Player
+var list_gp : Array = [ ]
+#var plyr_loc : Vector3 = get_node(“/root/Player”).transform.origin //Vector3
+
+var g_length : int = 3 #length of the grid
+var old_p_loc : Vector3 #last stored player location
+var radius : int = 2 #how far horizontally from old_p_loc the player can go before grid is moved
+var grid_moving : bool = false #If the grid is currently being moved
+
+# | Generate or Arrange Grid Around Player |
+# North is -1, West is -1
+
+func _ready():
+   _generate_grid()
+
+func _generate_grid():
+   grid_moving = true
+
+   if list_gp.size() < g_length * g_length:
+      for i in g_length * g_length - list_gp.size():
+         var gp = pre_gp.instance()
+         gp.setname("Grid_Piece_" + str(i) )
+         list_gp.append(gp)
+         add_child(gp)
+   
+   var grid_orig = old_p_loc - Vector3((g_length - 1) ÷ 2, 0, (g_length - 1) ÷ 2) #get the Northwestern corner of the future grid
+   var column = 0
+   for i in list_gp.size():
+      column = int(i ÷ g_length)
+      list_gp[i].transform.origin = grid_orig + Vector3(i - g_length * column, 0, column)
+
+   grid_moving = false
+
+#checks location of player each physics frame
+#subtracts old_p_loc from current player location
+#checks if absolute value of either the xz axis distance is above the radius
+#if above, calls _move_grid() function, passes distance Vector3, overwrites old_p_loc with current player location
+
+var dist : Vector3
+func _physics_process(delta):
+   if !grid_moving:
+      dist = p_t.origin - old_p_loc
+
+      var m : float = max(abs(dist.x), abs(dist.z))
+      #if max(abs(dist.x), abs(dist.z)) > radius:
+      if m > radius:
+         if m > length:
+            old_p_loc = p_t.origin
+            _generate_grid()
+            return
+         old_p_loc = p_t.origin
+         _move_grid(dist)
+
+#receives xyz distance player has moved and rearranges grid pieces around the new player location
+#Gets grid pieces on opposite edge of movement direction, and moves them to side of move direction
+#Changes grid piece index spot in Array to reflex new position in Grid
+
+func _move_grid(dist : Vector3):
+   grid_moving = true
+  
+   var passes : int
+   if dist.x != 0:
+      for i in abs(dist.x) - passes:
+         g_length
+         #holy shit it's 11:28 PM
